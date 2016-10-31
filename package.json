@@ -1,0 +1,26 @@
+{
+    "author": "yaga",
+    "dependencies": {},
+    "keywords": [],
+    "name": "tutorial-1",
+    "pebble": {
+        "displayName": "Tutorial 1",
+        "enableMultiJS": true,
+        "messageKeys": [],
+        "projectType": "native",
+        "resources": {
+            "media": []
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk"
+        ],
+        "uuid": "62403dfc-f912-448f-af36-a9d7279a8fcb",
+        "watchapp": {
+            "watchface": true
+        }
+    },
+    "version": "1.0.0"
+}
