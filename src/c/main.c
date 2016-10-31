@@ -26,6 +26,7 @@ static void bluetooth_callback(bool connected) {
   } else {
     window_set_background_color(s_main_window, GColorRed);
   }
+  vibes_double_pulse();
 }
 
 static void main_window_load(Window *window) {
