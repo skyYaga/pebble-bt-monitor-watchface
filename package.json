@@ -2,9 +2,9 @@
     "author": "yaga",
     "dependencies": {},
     "keywords": [],
-    "name": "tutorial-1",
+    "name": "bt-monitor",
     "pebble": {
-        "displayName": "Tutorial 1",
+        "displayName": "Bluetooth Monitor Watchface",
         "enableMultiJS": true,
         "messageKeys": [],
         "projectType": "native",
