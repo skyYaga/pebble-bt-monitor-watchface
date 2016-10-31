@@ -1,4 +1,5 @@
-var myAPIKey = '079481779c79efabd103c642225c181a';
+// https://home.openweathermap.org/api_keys
+var myAPIKey = 'CHANGEME';
 
 var xhrRequest = function(url, type, callback) {
   var xhr = new XMLHttpRequest();

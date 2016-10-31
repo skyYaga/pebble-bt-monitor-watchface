@@ -5,9 +5,11 @@ static TextLayer *s_time_layer;
 static BitmapLayer *s_background_layer;
 static GBitmap *s_background_bitmap;
 static TextLayer *s_weather_layer;
+static Layer *s_battery_layer;
 
 static GFont s_time_font;
 static GFont s_weather_font;
+static int s_battery_level;
 
 static void update_time() {
   // Get a tm structure
@@ -39,6 +41,12 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   }
 }
 
+static void battery_callback(BatteryChargeState state) {
+  // Record the new battery level
+  s_battery_level = state.charge_percent;
+  layer_mark_dirty(s_battery_layer);
+}
+
 static void bluetooth_callback(bool connected) {
   if (connected) {
     window_set_background_color(s_main_window, GColorBlue);  
@@ -46,6 +54,19 @@ static void bluetooth_callback(bool connected) {
     window_set_background_color(s_main_window, GColorRed);
   }
   vibes_double_pulse();
+}
+
+static void battery_update_proc(Layer *layer, GContext *ctx) {
+  GRect bounds = layer_get_bounds(layer);
+  
+  // Find the width of the bar
+  int width = (int)(float)(((float)s_battery_level / 100.0F) * 114.0F);
+  // Draw the background
+  graphics_context_set_fill_color(ctx, GColorBlack);
+  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
+  // Draw the bar
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_fill_rect(ctx, GRect(0, 0, width, bounds.size.h), 0, GCornerNone);
 }
 
 static void main_window_load(Window *window) {
@@ -88,8 +109,16 @@ static void main_window_load(Window *window) {
   text_layer_set_text(s_weather_layer, "Loading...");
   layer_add_child(window_layer, text_layer_get_layer(s_weather_layer));
   
+  // Create battery meter Layer
+  s_battery_layer = layer_create(GRect(15, 53, 115, 2));
+  layer_set_update_proc(s_battery_layer, battery_update_proc);
+  layer_add_child(window_layer, s_battery_layer);
+  
   // Show the correct state of the BT connection from the start
   bluetooth_callback(connection_service_peek_pebble_app_connection());
+  
+  // Ensure the battery level is displayed from the start
+  battery_callback(battery_state_service_peek());
 }
 
 static void main_window_unload(Window *window) {
@@ -102,6 +131,8 @@ static void main_window_unload(Window *window) {
   // Destroy weather layer + GFont
   text_layer_destroy(s_weather_layer);
   fonts_unload_custom_font(s_weather_font);
+  // Destroy battery bar
+  layer_destroy(s_battery_layer);
 }
 
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
@@ -158,6 +189,9 @@ static void init() {
   connection_service_subscribe((ConnectionHandlers) {
     .pebble_app_connection_handler = bluetooth_callback
   });
+  
+  // Register for battery level updates
+  battery_state_service_subscribe(battery_callback);
   
   // Register callbacks
   app_message_register_inbox_received(inbox_received_callback);
